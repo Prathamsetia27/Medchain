@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+
+<div class="welcome-banner p-4 rounded-4 shadow mb-4">
+  <div class="row align-items-center">
+    <div class="col">
+      <h3 class="fw-bold mb-1"><i class="bi bi-gear-fill me-2"></i>Admin Dashboard</h3>
+      <p class="mb-0 opacity-75">System overview — Aarogya AI Healthcare Platform</p>
+    </div>
+    <div class="col-auto">
+      <form method="POST" action="{{ url_for('retrain_model') }}"
+            onsubmit="return confirm('Retrain the AI model? This may take a moment.')">
+        <button type="submit" class="btn btn-warning fw-semibold">
+          <i class="bi bi-arrow-repeat me-2"></i>Retrain AI Model
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm stat-card h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-people-fill display-4 text-primary mb-3"></i>
+        <h2 class="fw-bold text-primary">{{ total_users }}</h2>
+        <p class="text-muted mb-0">Registered Patients</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm stat-card h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-hospital-fill display-4 text-success mb-3"></i>
+        <h2 class="fw-bold text-success">{{ total_doctors }}</h2>
+        <p class="text-muted mb-0">Registered Doctors</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm stat-card h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-file-medical-fill display-4 text-info mb-3"></i>
+        <h2 class="fw-bold text-info">{{ total_records }}</h2>
+        <p class="text-muted mb-0">AI Diagnoses</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card border-0 shadow-sm stat-card h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-robot display-4 text-warning mb-3"></i>
+        <h2 class="fw-bold text-warning">{{ accuracy }}%</h2>
+        <p class="text-muted mb-0">Model Accuracy</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <a href="{{ url_for('admin_users') }}" class="text-decoration-none">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3 action-card">
+        <i class="bi bi-people-fill fs-2 text-primary"></i>
+        <div>
+          <h6 class="fw-bold mb-0">Manage Users</h6>
+          <small class="text-muted">View all patients, doctors & admins</small>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ url_for('blockchain_audit') }}" class="text-decoration-none">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3 action-card">
+        <i class="bi bi-link-45deg fs-2 text-success"></i>
+        <div>
+          <h6 class="fw-bold mb-0">Blockchain Audit</h6>
+          <small class="text-muted">Verify integrity of all records</small>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ url_for('admin_records') }}" class="text-decoration-none">
+      <div class="card border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3 action-card">
+        <i class="bi bi-file-medical-fill fs-2 text-info"></i>
+        <div>
+          <h6 class="fw-bold mb-0">All Records</h6>
+          <small class="text-muted">Read-only view of medical data</small>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- Audit Log -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white border-0">
+    <h5 class="fw-bold mb-0"><i class="bi bi-journal-text me-2"></i>Recent Activity Log</h5>
+    <small class="text-muted">Last 20 system events</small>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover table-sm mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Time</th>
+            <th>User</th>
+            <th>Role</th>
+            <th>Action</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in recent_logs %}
+          <tr>
+            <td><small class="text-muted">{{ log.timestamp[:16].replace('T',' ') }}</small></td>
+            <td><small>{{ log.full_name or 'System' }}</small></td>
+            <td>
+              <span class="badge bg-{{ 'primary' if log.role == 'patient' else 'success' if log.role == 'doctor' else 'warning' }}-subtle text-{{ 'primary' if log.role == 'patient' else 'success' if log.role == 'doctor' else 'warning' }}">
+                {{ log.role or '—' }}
+              </span>
+            </td>
+            <td>
+              <code class="small">{{ log.action }}</code>
+            </td>
+            <td><small class="text-muted">{{ log.details or '—' }}</small></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

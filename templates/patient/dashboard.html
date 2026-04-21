@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard{% endblock %}
+{% block content %}
+
+<!-- ── Profile Incomplete Notification ──────────────────── -->
+{% if not profile_complete %}
+<div class="profile-alert-strip mb-4" id="profileAlert" style="background: linear-gradient(135deg, #fff3cd, #ffc107); border-radius: 14px; padding: 16px 20px; border-left: 5px solid #ff6b35; box-shadow: 0 4px 16px rgba(255,193,7,0.25); animation: slideInAlert 0.5s ease both; position: relative; overflow: hidden;">
+  <style>
+    @keyframes slideInAlert { from { opacity:0; transform:translateY(-15px); } to { opacity:1; transform:translateY(0); } }
+    .alert-fill-bar { position:absolute; bottom:0; left:0; height:3px; background:linear-gradient(90deg,#ff6b35,#ffc107); animation: fillBar 8s linear forwards; }
+    @keyframes fillBar { from { width:0%; } to { width:100%; } }
+    .alert-bell { font-size:1.8rem; animation: bellRing 1.5s ease-in-out infinite; display:inline-block; }
+    @keyframes bellRing { 0%,100%{transform:rotate(0)} 10%,30%{transform:rotate(-15deg)} 20%,40%{transform:rotate(15deg)} }
+  </style>
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <span class="alert-bell">🔔</span>
+    <div class="flex-grow-1">
+      <strong style="color:#856404;">Complete Your Health Profile</strong><br>
+      <small class="text-muted">We need your age, weight, height & blood group for accurate AI diagnosis</small>
+    </div>
+    <a href="{{ url_for('patient_profile') }}" class="btn btn-sm fw-semibold px-4" style="background:#ff6b35;color:white;border:none;border-radius:8px;">
+      <i class="bi bi-pencil-fill me-1"></i>Set Up Profile
+    </a>
+    <button type="button" class="btn-close" onclick="document.getElementById('profileAlert').style.display='none'"></button>
+  </div>
+  <div class="alert-fill-bar" id="alertFillBar"></div>
+</div>
+<script>
+  setTimeout(() => {
+    const el = document.getElementById('profileAlert');
+    if (el) { el.style.transition='opacity 0.5s'; el.style.opacity='0'; setTimeout(()=>el.style.display='none',500); }
+  }, 8000);
+</script>
+{% endif %}
+
+
+<!-- Welcome Banner -->
+<div class="welcome-banner p-4 rounded-4 shadow mb-4">
+  <div class="row align-items-center">
+    <div class="col">
+      <h3 class="fw-bold mb-1">
+        <i class="bi bi-person-heart me-2"></i>Welcome, {{ user.full_name }}
+      </h3>
+      <p class="mb-0 opacity-75">Your health companion — AI-powered, blockchain-secured</p>
+    </div>
+    <div class="col-auto">
+      <span class="badge bg-light text-dark px-3 py-2">
+        <i class="bi bi-cpu text-primary me-1"></i>Model Accuracy: <strong>{{ accuracy }}%</strong>
+      </span>
+    </div>
+  </div>
+</div>
+
+
+<!-- Profile Summary Card (if profile exists) -->
+{% if profile_complete and profile %}
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm" style="border-left: 4px solid #1a6fba !important; border-radius: 12px;">
+      <div class="card-body py-3 px-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <span style="font-size:1.6rem;">🧬</span>
+            <div>
+              <div class="fw-bold text-primary mb-1">Your Health Profile</div>
+              <div class="d-flex gap-3 flex-wrap">
+                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i><strong>{{ profile.age }} yrs</strong></small>
+                <small class="text-muted"><i class="bi bi-person me-1"></i><strong>{{ profile.gender }}</strong></small>
+                <small class="text-muted"><i class="bi bi-speedometer2 me-1"></i><strong>{{ profile.weight_kg }} kg</strong></small>
+                <small class="text-muted"><i class="bi bi-person-standing me-1"></i><strong>{{ profile.height_cm }} cm</strong></small>
+                <small class="text-muted"><i class="bi bi-droplet-fill text-danger me-1"></i><strong>{{ profile.blood_group }}</strong></small>
+              </div>
+            </div>
+          </div>
+          <a href="{{ url_for('patient_profile') }}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-pencil me-1"></i>Edit Profile
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+<!-- Action Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <a href="{{ url_for('predict') }}" class="text-decoration-none">
+      <div class="card action-card border-0 shadow-sm h-100 text-center p-4">
+        <i class="bi bi-cpu-fill display-4 text-primary mb-3"></i>
+        <h5 class="fw-bold">AI Diagnosis</h5>
+        <p class="text-muted small">Enter your symptoms and let the AI predict your condition with explainable results.</p>
+        <span class="btn btn-primary-custom btn-sm mt-auto">Start Diagnosis →</span>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ url_for('patient_history') }}" class="text-decoration-none">
+      <div class="card action-card border-0 shadow-sm h-100 text-center p-4">
+        <i class="bi bi-clock-history display-4 text-info mb-3"></i>
+        <h5 class="fw-bold">Medical History</h5>
+        <p class="text-muted small">View all your past AI predictions with blockchain-verified record integrity.</p>
+        <span class="btn btn-info btn-sm mt-auto text-white">View History →</span>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ url_for('manage_consent') }}" class="text-decoration-none">
+      <div class="card action-card border-0 shadow-sm h-100 text-center p-4">
+        <i class="bi bi-shield-check display-4 text-success mb-3"></i>
+        <h5 class="fw-bold">Consent Manager</h5>
+        <p class="text-muted small">Control which doctors can view your medical records. You are in charge.</p>
+        <span class="btn btn-success btn-sm mt-auto">Manage Access →</span>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- Recent Records -->
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+    <h5 class="fw-bold mb-0"><i class="bi bi-file-medical me-2"></i>Recent Diagnoses</h5>
+    <a href="{{ url_for('patient_history') }}" class="btn btn-sm btn-outline-primary">View All</a>
+  </div>
+  <div class="card-body p-0">
+    {% if records %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Date &amp; Time</th>
+            <th>Predicted Disease</th>
+            <th>Confidence</th>
+            <th>Blockchain</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+          <tr>
+            <td><small class="text-muted">#{{ r.id }}</small></td>
+            <td><small>{{ r.timestamp[:16].replace('T',' ') }}</small></td>
+            <td>
+              <span class="fw-semibold text-primary">{{ r.predicted_disease }}</span>
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:8px;min-width:60px">
+                  <div class="progress-bar bg-success" style="width:{{ r.confidence }}%"></div>
+                </div>
+                <small>{{ r.confidence }}%</small>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-success-subtle text-success">
+                <i class="bi bi-link-45deg me-1"></i>Hashed
+              </span>
+            </td>
+            <td>
+              <a href="{{ url_for('patient_record_detail', record_id=r.id) }}"
+                 class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-eye me-1"></i>View
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-file-medical display-4 opacity-25"></i>
+      <p class="mt-3">No diagnoses yet. Start by entering your symptoms!</p>
+      <a href="{{ url_for('predict') }}" class="btn btn-primary-custom">Start AI Diagnosis</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

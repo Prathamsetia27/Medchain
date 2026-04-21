@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}AI Symptom Analysis{% endblock %}
+{% block content %}
+
+<div class="row">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-primary-custom text-white py-3">
+        <h4 class="mb-0 fw-bold">
+          <i class="bi bi-cpu-fill me-2"></i>Medchain — Symptom Analyser
+        </h4>
+        <small class="opacity-75">Select your symptoms below. Choose at least 3 for accurate prediction.</small>
+      </div>
+      <div class="card-body p-4">
+
+        <!-- Search box -->
+        <div class="mb-4">
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="symptomSearch" class="form-control form-control-lg"
+                   placeholder="Search symptoms (e.g. fever, cough, itching…)">
+          </div>
+          <div class="form-text mt-1">
+            <span id="selectedCount" class="badge bg-primary">0</span> symptoms selected
+          </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('predict') }}" id="predictForm">
+          
+          <!-- Symptom grid -->
+          <div class="row g-2" id="symptomGrid">
+            {% for raw, display in symptom_pairs %}
+            <div class="col-md-3 col-sm-4 col-6 symptom-item">
+              <div class="form-check symptom-check-card">
+                <input class="form-check-input symptom-cb" type="checkbox"
+                       name="symptoms" value="{{ raw }}"
+                       id="sym_{{ loop.index }}"
+                       onchange="updateCount()">
+                <label class="form-check-label w-100" for="sym_{{ loop.index }}">
+                  {{ display }}
+                </label>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Selected symptoms preview -->
+          <div id="selectedPreview" class="mt-4 d-none">
+            <h6 class="fw-bold text-primary">
+              <i class="bi bi-check2-square me-2"></i>Selected Symptoms:
+            </h6>
+            <div id="selectedTags" class="d-flex flex-wrap gap-2"></div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+              <i class="bi bi-info-circle me-1"></i>
+              This AI prediction is for guidance only. Always consult a qualified doctor.
+            </small>
+            <button type="submit" class="btn btn-primary-custom btn-lg px-5">
+              <i class="bi bi-cpu me-2"></i>Predict Disease
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+// Real-time symptom search filter
+document.getElementById('symptomSearch').addEventListener('input', function () {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.symptom-item').forEach(item => {
+    const label = item.querySelector('label').textContent.toLowerCase();
+    item.style.display = label.includes(q) ? '' : 'none';
+  });
+});
+
+// Update selected count and tags
+function updateCount() {
+  const checked = document.querySelectorAll('.symptom-cb:checked');
+  document.getElementById('selectedCount').textContent = checked.length;
+
+  const tagsDiv = document.getElementById('selectedTags');
+  const preview = document.getElementById('selectedPreview');
+  tagsDiv.innerHTML = '';
+  if (checked.length > 0) {
+    preview.classList.remove('d-none');
+    checked.forEach(cb => {
+      const label = document.querySelector(`label[for="${cb.id}"]`).textContent.trim();
+      tagsDiv.innerHTML += `<span class="badge bg-primary-subtle text-primary border border-primary px-3 py-2">${label}</span>`;
+    });
+  } else {
+    preview.classList.add('d-none');
+  }
+}
+
+// Validate minimum 3 symptoms
+document.getElementById('predictForm').addEventListener('submit', function(e) {
+  const checked = document.querySelectorAll('.symptom-cb:checked').length;
+  if (checked < 3) {
+    e.preventDefault();
+    alert('Please select at least 3 symptoms for an accurate prediction.');
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,263 @@
+/* ============================================================
+   style.css — Aarogya AI Healthcare System
+   Professional healthcare UI with Bootstrap 5 customisation
+   ============================================================ */
+
+/* ── CSS Custom Properties ─────────────────────────────── */
+:root {
+  --primary:       #1a6fba;
+  --primary-dark:  #155090;
+  --primary-light: #e8f3ff;
+  --success:       #198754;
+  --warning:       #f0ad4e;
+  --gradient-start:#1a6fba;
+  --gradient-end:  #0d4e8a;
+  --border-radius: 0.75rem;
+  --shadow:        0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* ── Base ────────────────────────────────────────────────── */
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 0.95rem;
+  background: #f4f7fb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main.container {
+  flex: 1;
+}
+
+/* ── Navbar ──────────────────────────────────────────────── */
+.bg-primary-custom {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)) !important;
+}
+
+.navbar-brand {
+  letter-spacing: 0.5px;
+}
+
+/* Role badge colours */
+.bg-role-patient { background: #cfe2ff !important; color: #0a58ca !important; }
+.bg-role-doctor  { background: #d1e7dd !important; color: #146c43 !important; }
+.bg-role-admin   { background: #fff3cd !important; color: #997404 !important; }
+
+/* ── Hero / Welcome Banners ──────────────────────────────── */
+.hero-section {
+  background: linear-gradient(135deg, var(--gradient-start) 0%, #0d4e8a 50%, #062d5a 100%);
+  min-height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-banner {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: white;
+}
+
+.result-banner {
+  background: linear-gradient(135deg, #198754, #14603d);
+  color: white;
+}
+
+/* ── Cards ──────────────────────────────────────────────── */
+.card {
+  border-radius: var(--border-radius) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover,
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+}
+
+.action-card {
+  cursor: pointer;
+  border: 1px solid #e9ecef !important;
+  border-radius: var(--border-radius) !important;
+  transition: all 0.2s ease;
+}
+
+.action-card:hover {
+  border-color: var(--primary) !important;
+  background: var(--primary-light);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.history-card:hover {
+  transform: translateX(4px);
+  border-left: 4px solid var(--primary) !important;
+}
+
+/* Role-tinted card borders */
+.role-card-patient { border-left: 4px solid var(--primary) !important; }
+.role-card-doctor  { border-left: 4px solid var(--success) !important; }
+.role-card-admin   { border-left: 4px solid var(--warning) !important; }
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn-primary-custom {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border: none;
+  color: white;
+  transition: all 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+  background: linear-gradient(135deg, var(--primary-dark), #0c3d6e);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(26, 111, 186, 0.4);
+}
+
+/* ── CAPTCHA Box ─────────────────────────────────────────── */
+.captcha-box {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border: 2px dashed #adb5bd;
+}
+
+.captcha-question {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  letter-spacing: 4px;
+  font-family: 'Courier New', monospace;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.15);
+  /* slight visual distortion to make it harder for bots */
+  transform: skewX(-5deg);
+  display: inline-block;
+}
+
+/* ── Symptom Checkboxes ──────────────────────────────────── */
+.symptom-check-card {
+  background: white;
+  border: 1.5px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.symptom-check-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.symptom-cb:checked + label.symptom-check-card,
+.symptom-check-card:has(.symptom-cb:checked) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+/* Jinja2-compatible checked styling (via JS class) */
+.symptom-check-card.is-checked {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  font-weight: 600;
+}
+
+.form-check-input.symptom-cb:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ── Hash Display ──────────────────────────────────────────── */
+.hash-display {
+  border: 1px solid #dee2e6;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+}
+
+/* ── Precaution Items ────────────────────────────────────── */
+.precaution-item {
+  background: #f8f9fa;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* ── Diagnosis Entry ─────────────────────────────────────── */
+.diagnosis-entry {
+  border-left: 4px solid var(--success);
+}
+
+/* ── Progress Bars ───────────────────────────────────────── */
+.progress {
+  border-radius: 10px;
+}
+
+.progress-bar {
+  border-radius: 10px;
+  transition: width 0.6s ease;
+}
+
+/* ── Tables ──────────────────────────────────────────────── */
+.table th {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table tbody tr:hover {
+  background: #f8f9ff;
+}
+
+/* ── Alert Customisation ─────────────────────────────────── */
+.alert {
+  border-radius: var(--border-radius);
+  border: none;
+}
+
+/* ── Footer ──────────────────────────────────────────────── */
+.footer-custom {
+  background: linear-gradient(135deg, #1e2a38, #2d3e50);
+  color: #adb5bd;
+  margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ── Prediction Icon Box ─────────────────────────────────── */
+.prediction-icon {
+  background: var(--primary-light);
+  padding: 1rem;
+  border-radius: 1rem;
+  flex-shrink: 0;
+}
+
+/* ── Doctor Avatar ───────────────────────────────────────── */
+.doctor-avatar {
+  background: var(--primary-light);
+  padding: 0.75rem;
+  border-radius: 50%;
+}
+
+/* ── Blockchain Status Card ──────────────────────────────── */
+.border-4 {
+  border-width: 4px !important;
+}
+
+/* ── Responsive tweaks ───────────────────────────────────── */
+@media (max-width: 576px) {
+  .hero-section { min-height: 260px; padding: 2rem 1rem !important; }
+  .captcha-question { font-size: 1.4rem; letter-spacing: 2px; }
+  .welcome-banner { padding: 1.5rem !important; }
+}
+
+/* ── Subtle badge variants (Bootstrap 5.3 compat) ───────── */
+.bg-primary-subtle   { background: #cfe2ff !important; }
+.bg-success-subtle   { background: #d1e7dd !important; }
+.bg-warning-subtle   { background: #fff3cd !important; }
+.bg-danger-subtle    { background: #f8d7da !important; }
+.bg-secondary-subtle { background: #e2e3e5 !important; }
+.bg-info-subtle      { background: #cff4fc !important; }

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}All Records{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between mb-4">
+  <h3 class="fw-bold"><i class="bi bi-file-medical me-2"></i>All Medical Records (Read-Only)</h3>
+  <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">← Dashboard</a>
+</div>
+
+<div class="alert alert-secondary mb-4 py-2">
+  <i class="bi bi-eye me-2"></i>
+  <strong>Admin read-only view.</strong> These records cannot be modified through this interface.
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    {% if records %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>#</th>
+            <th>Patient</th>
+            <th>Predicted Disease</th>
+            <th>Confidence</th>
+            <th>Date</th>
+            <th>Blockchain</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+          <tr>
+            <td><small class="text-muted">{{ r.id }}</small></td>
+            <td><strong>{{ r.patient_name }}</strong></td>
+            <td class="text-primary fw-semibold">{{ r.predicted_disease }}</td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <div class="progress flex-grow-1" style="height:6px;min-width:50px">
+                  <div class="progress-bar bg-success" style="width:{{ r.confidence }}%"></div>
+                </div>
+                <small>{{ r.confidence }}%</small>
+              </div>
+            </td>
+            <td><small>{{ r.timestamp[:16].replace('T',' ') }}</small></td>
+            <td>
+              <span class="badge bg-success-subtle text-success">
+                <i class="bi bi-link-45deg me-1"></i>Secured
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="bi bi-file-medical display-1 opacity-25"></i>
+      <h5 class="mt-4">No medical records yet</h5>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+
+{% endblock %}

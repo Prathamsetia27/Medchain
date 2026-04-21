@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: aarogya-ai
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        value: aarogya-secret-2024-xK9mP2qR
+      - key: PYTHON_VERSION
+        value: 3.9.0

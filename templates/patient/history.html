@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Medical History{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="fw-bold"><i class="bi bi-clock-history me-2"></i>Medical History</h3>
+  <a href="{{ url_for('predict') }}" class="btn btn-primary-custom">
+    <i class="bi bi-plus-circle me-2"></i>New Diagnosis
+  </a>
+</div>
+
+{% if records %}
+<div class="row g-3">
+  {% for r in records %}
+  <div class="col-12">
+    <div class="card border-0 shadow-sm history-card">
+      <div class="card-body p-4">
+        <div class="row align-items-center">
+          <div class="col-md-5">
+            <div class="d-flex align-items-center gap-3">
+              <div class="record-icon">
+                <i class="bi bi-file-medical text-primary fs-2"></i>
+              </div>
+              <div>
+                <h5 class="fw-bold text-primary mb-1">{{ r.predicted_disease }}</h5>
+                <small class="text-muted">
+                  <i class="bi bi-calendar3 me-1"></i>{{ r.timestamp[:16].replace('T',' ') }}
+                </small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="d-flex flex-column align-items-center">
+              <small class="text-muted mb-1">AI Confidence</small>
+              <div class="progress w-100 mb-1" style="height:8px">
+                <div class="progress-bar bg-{{ 'success' if r.confidence > 70 else 'warning' }}"
+                     style="width:{{ r.confidence }}%"></div>
+              </div>
+              <span class="fw-bold text-{{ 'success' if r.confidence > 70 else 'warning' }}">{{ r.confidence }}%</span>
+            </div>
+          </div>
+          <div class="col-md-2 text-center">
+            <span class="badge bg-success-subtle text-success px-3 py-2">
+              <i class="bi bi-link-45deg me-1"></i>Verified
+            </span>
+          </div>
+          <div class="col-md-2 text-end">
+            <a href="{{ url_for('patient_record_detail', record_id=r.id) }}"
+               class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-eye me-1"></i>Details
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+  <i class="bi bi-file-medical display-1 text-muted opacity-25"></i>
+  <h5 class="mt-4 text-muted">No records yet</h5>
+  <p class="text-muted">Start by entering your symptoms for an AI-powered diagnosis.</p>
+  <a href="{{ url_for('predict') }}" class="btn btn-primary-custom btn-lg mt-2">Start AI Diagnosis</a>
+</div>
+{% endif %}
+
+{% endblock %}

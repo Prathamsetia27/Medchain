@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Record Detail{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between mb-4">
+  <h3 class="fw-bold"><i class="bi bi-file-medical me-2"></i>Record #{{ record.id }} — Full Detail</h3>
+  <a href="{{ url_for('patient_history') }}" class="btn btn-outline-secondary">← Back</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <!-- Prediction summary -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0">
+        <h5 class="fw-bold mb-0"><i class="bi bi-cpu me-2 text-primary"></i>AI Prediction</h5>
+      </div>
+      <div class="card-body">
+        <h3 class="text-primary fw-bold">{{ record.predicted_disease }}</h3>
+        <div class="progress mb-2" style="height:10px">
+          <div class="progress-bar bg-success" style="width:{{ record.confidence }}%"></div>
+        </div>
+        <p class="text-muted">Confidence: <strong>{{ record.confidence }}%</strong></p>
+        <p>{{ record.ai_description }}</p>
+        <h6 class="fw-bold mt-3">Precautions:</h6>
+        <ul>
+          {% for p in precautions %}
+          <li>{{ p }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Symptoms -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0">
+        <h5 class="fw-bold mb-0"><i class="bi bi-list-check text-primary me-2"></i>Reported Symptoms</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          {% for s in symptoms_list %}
+          <span class="badge bg-primary px-3 py-2">{{ s.replace('_',' ').title() }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Doctor Diagnoses -->
+    {% if diagnoses %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0">
+        <h5 class="fw-bold mb-0"><i class="bi bi-person-badge text-success me-2"></i>Doctor's Clinical Notes</h5>
+      </div>
+      <div class="card-body">
+        {% for d in diagnoses %}
+        <div class="diagnosis-entry p-3 rounded-3 bg-light mb-3">
+          <div class="d-flex justify-content-between mb-2">
+            <strong><i class="bi bi-hospital me-1"></i>{{ d.doctor_name }}</strong>
+            <small class="text-muted">{{ d.created_at[:16].replace('T',' ') }}</small>
+          </div>
+          {% if d.specialization %}
+          <small class="text-muted d-block mb-2">{{ d.specialization }}</small>
+          {% endif %}
+          <p class="mb-2"><strong>Notes:</strong> {{ d.notes }}</p>
+          {% if d.prescription %}
+          <div class="alert alert-info py-2 mb-0">
+            <i class="bi bi-capsule me-2"></i><strong>Prescription:</strong> {{ d.prescription }}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Blockchain Verification Sidebar -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm border-start border-4 {{ 'border-success' if is_intact else 'border-danger' }}">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">
+          <i class="bi bi-link-45deg me-2"></i>Blockchain Verification
+        </h5>
+
+        {% if is_intact %}
+        <div class="text-center mb-4">
+          <i class="bi bi-shield-check-fill display-3 text-success"></i>
+          <h5 class="fw-bold text-success mt-2">RECORD INTACT</h5>
+          <small class="text-muted">Hash matches — data not tampered</small>
+        </div>
+        {% else %}
+        <div class="text-center mb-4">
+          <i class="bi bi-shield-x-fill display-3 text-danger"></i>
+          <h5 class="fw-bold text-danger mt-2">TAMPER DETECTED</h5>
+          <small class="text-muted">Hash mismatch — data may be altered</small>
+        </div>
+        {% endif %}
+
+        <hr>
+
+        <div class="mb-3">
+          <small class="text-muted d-block fw-bold">SHA-256 Record Hash:</small>
+          <div class="bg-light p-2 rounded mt-1">
+            <code class="small" style="word-break:break-all">{{ record.blockchain_hash }}</code>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <small class="text-muted d-block fw-bold">Previous Block Hash:</small>
+          <div class="bg-light p-2 rounded mt-1">
+            <code class="small" style="word-break:break-all">{{ record.prev_hash }}</code>
+          </div>
+        </div>
+
+        <div class="mb-0">
+          <small class="text-muted d-block fw-bold">Timestamp:</small>
+          <p class="mb-0">{{ record.timestamp[:16].replace('T',' ') }} UTC</p>
+        </div>
+
+        <div class="alert alert-light mt-3 py-2 mb-0 border">
+          <small>
+            <i class="bi bi-info-circle me-1"></i>
+            The blockchain hash is computed from your record data using SHA-256.
+            If any field is altered, the hash will no longer match, proving tampering.
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

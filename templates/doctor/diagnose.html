@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Add Diagnosis{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between mb-4">
+  <h3 class="fw-bold"><i class="bi bi-pencil-square me-2"></i>Add Clinical Diagnosis</h3>
+  <a href="javascript:history.back()" class="btn btn-outline-secondary">← Back</a>
+</div>
+
+<div class="row g-4">
+  <!-- AI Record (read-only) -->
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white border-0">
+        <h5 class="fw-bold mb-0">
+          <i class="bi bi-cpu text-primary me-2"></i>AI Prediction (Read-Only)
+        </h5>
+        <small class="text-muted">Original record — cannot be modified</small>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <h4 class="text-primary fw-bold">{{ record.predicted_disease }}</h4>
+          <div class="progress mb-1" style="height:8px">
+            <div class="progress-bar bg-success" style="width:{{ record.confidence }}%"></div>
+          </div>
+          <small>Confidence: <strong>{{ record.confidence }}%</strong></small>
+        </div>
+
+        <p>{{ record.ai_description }}</p>
+
+        <h6 class="fw-bold">Reported Symptoms:</h6>
+        <div class="d-flex flex-wrap gap-1 mb-3">
+          {% for s in symptoms_list %}
+          <span class="badge bg-light text-dark border">{{ s.replace('_',' ').title() }}</span>
+          {% endfor %}
+        </div>
+
+        <h6 class="fw-bold">AI Precautions:</h6>
+        <ul class="mb-0">
+          {% for p in precautions %}
+          <li class="small">{{ p }}</li>
+          {% endfor %}
+        </ul>
+
+        <hr>
+        <small class="text-muted">
+          <i class="bi bi-calendar3 me-1"></i>{{ record.timestamp[:16].replace('T',' ') }} UTC
+        </small><br>
+        <small class="text-muted">
+          <i class="bi bi-link-45deg me-1"></i>Hash: <code style="word-break:break-all;font-size:0.7rem">{{ record.blockchain_hash }}</code>
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Doctor Input -->
+  <div class="col-lg-6">
+    <!-- Existing diagnoses -->
+    {% if existing_diagnoses %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0">
+        <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Previous Notes</h5>
+      </div>
+      <div class="card-body">
+        {% for d in existing_diagnoses %}
+        <div class="bg-light p-3 rounded mb-2">
+          <small class="text-muted d-block">{{ d.created_at[:16].replace('T',' ') }}</small>
+          <p class="mb-1">{{ d.notes }}</p>
+          {% if d.prescription %}
+          <small class="text-info"><i class="bi bi-capsule me-1"></i>{{ d.prescription }}</small>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Add new diagnosis -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0">
+        <h5 class="fw-bold mb-0"><i class="bi bi-plus-circle text-success me-2"></i>Add Your Diagnosis</h5>
+        <small class="text-muted">This will be appended; original AI record is preserved.</small>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('doctor_diagnose', record_id=record.id) }}">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Clinical Notes *</label>
+            <textarea name="notes" class="form-control" rows="5"
+                      placeholder="Enter your clinical assessment, observations, and diagnosis…"
+                      required></textarea>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Prescription <small class="text-muted fw-normal">(optional)</small></label>
+            <textarea name="prescription" class="form-control" rows="3"
+                      placeholder="Medication names, dosage, duration…"></textarea>
+          </div>
+          <div class="alert alert-warning py-2 mb-3">
+            <small>
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Once saved, your notes are appended to the patient's record. 
+              The original AI record and its blockchain hash remain unchanged.
+            </small>
+          </div>
+          <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+            <i class="bi bi-save me-2"></i>Save Diagnosis
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

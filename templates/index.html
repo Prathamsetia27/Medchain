@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<!-- Hero Section -->
+<div class="hero-section rounded-4 shadow-lg p-5 mb-5 text-white text-center">
+  <div class="py-3">
+    <div class="mb-4">
+      <i class="bi bi-heart-pulse-fill display-1"></i>
+    </div>
+    <h1 class="display-4 fw-bold mb-3">Medchain</h1>
+    <p class="lead mb-2">Role-Based Intelligent Healthcare System</p>
+    <p class="mb-4 opacity-75">AI-powered disease prediction &nbsp;·&nbsp; SHA-256 Blockchain integrity &nbsp;·&nbsp; CAPTCHA-secured access</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-4 fw-semibold">
+        <i class="bi bi-person-plus me-2"></i>Register as Patient
+      </a>
+      <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-4">
+        <i class="bi bi-box-arrow-in-right me-2"></i>Login
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Feature Cards -->
+<div class="row g-4 mb-5">
+  <div class="col-md-4">
+    <div class="card feature-card h-100 shadow-sm border-0">
+      <div class="card-body text-center p-4">
+        <div class="feature-icon mb-3 text-primary">
+          <i class="bi bi-cpu-fill fs-1"></i>
+        </div>
+        <h5 class="fw-bold">AI Disease Prediction</h5>
+        <p class="text-muted">Random Forest model trained on 132 symptoms &amp; 42 diseases from Kaggle dataset. Provides disease prediction with confidence score and differential diagnoses.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card feature-card h-100 shadow-sm border-0">
+      <div class="card-body text-center p-4">
+        <div class="feature-icon mb-3 text-success">
+          <i class="bi bi-link-45deg fs-1"></i>
+        </div>
+        <h5 class="fw-bold">Blockchain Integrity</h5>
+        <p class="text-muted">Every medical record is hashed with SHA-256, chained to the previous record. Any tampering is immediately detected through hash verification.</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card feature-card h-100 shadow-sm border-0">
+      <div class="card-body text-center p-4">
+        <div class="feature-icon mb-3 text-warning">
+          <i class="bi bi-shield-lock-fill fs-1"></i>
+        </div>
+        <h5 class="fw-bold">Role-Based Access</h5>
+        <p class="text-muted">Strict separation between Patient, Doctor, and Admin roles. Patients control which doctors can view their records through consent management.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock %}

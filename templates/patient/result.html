@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}AI Result{% endblock %}
+{% block content %}
+
+<!-- AI Result Header -->
+<div class="result-banner p-4 rounded-4 shadow mb-4 text-white">
+  <div class="row align-items-center">
+    <div class="col">
+      <h3 class="fw-bold mb-1"><i class="bi bi-cpu-fill me-2"></i>AI Prediction Result</h3>
+      <p class="mb-0 opacity-75">Based on your {{ selected|length }} reported symptoms</p>
+    </div>
+    <div class="col-auto">
+      <span class="badge bg-white text-dark px-3 py-2 fs-6">
+        Record #{{ record_id }}
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Main prediction card -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-start gap-4">
+          <div class="prediction-icon">
+            <i class="bi bi-activity display-3 text-primary"></i>
+          </div>
+          <div class="flex-grow-1">
+            <p class="text-muted mb-1 small">PRIMARY PREDICTION</p>
+            <h2 class="fw-bold text-primary mb-2">{{ result.disease }}</h2>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-1">
+                <span class="small fw-semibold">AI Confidence</span>
+                <span class="small fw-bold text-{{ 'success' if result.confidence > 70 else 'warning' }}">
+                  {{ result.confidence }}%
+                </span>
+              </div>
+              <div class="progress" style="height:10px">
+                <div class="progress-bar bg-{{ 'success' if result.confidence > 70 else 'warning' }}"
+                     style="width:{{ result.confidence }}%" role="progressbar"></div>
+              </div>
+            </div>
+            <div class="alert alert-info py-2 mb-0">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>About this condition:</strong> {{ result.description }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Precautions -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0">
+        <h5 class="fw-bold mb-0"><i class="bi bi-shield-plus text-success me-2"></i>Recommended Precautions</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          {% for p in result.precautions %}
+          <div class="col-md-6">
+            <div class="precaution-item d-flex align-items-start gap-2">
+              <i class="bi bi-check-circle-fill text-success mt-1"></i>
+              <span>{{ p }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="alert alert-warning mt-3 mb-0 py-2">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <strong>Important:</strong> This AI recommendation is for reference only. 
+          Please consult a qualified doctor for diagnosis and treatment.
+        </div>
+      </div>
+    </div>
+
+    <!-- Differential Diagnoses -->
+    {% if result.differentials|length > 1 %}
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-0">
+        <h5 class="fw-bold mb-0">
+          <i class="bi bi-list-ol text-info me-2"></i>Differential Diagnoses
+        </h5>
+        <small class="text-muted">Other conditions the AI considered</small>
+      </div>
+      <div class="card-body">
+        {% for d in result.differentials %}
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="{{ 'fw-bold text-primary' if loop.first else '' }}">
+              {% if loop.first %}<i class="bi bi-trophy-fill text-warning me-2"></i>{% endif %}
+              {{ d.disease }}
+            </span>
+            <span class="badge bg-{{ 'primary' if loop.first else 'secondary' }}-subtle text-{{ 'primary' if loop.first else 'secondary' }}">
+              {{ d.probability }}%
+            </span>
+          </div>
+          <div class="progress" style="height:6px">
+            <div class="progress-bar bg-{{ 'primary' if loop.first else 'secondary' }}"
+                 style="width:{{ d.probability }}%"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Matched Symptoms -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0">
+        <h5 class="fw-bold mb-0"><i class="bi bi-list-check text-primary me-2"></i>Your Reported Symptoms</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          {% for s in selected %}
+          <span class="badge bg-primary px-3 py-2">
+            <i class="bi bi-check2 me-1"></i>{{ s.replace('_', ' ').title() }}
+          </span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar: Blockchain + Actions -->
+  <div class="col-lg-4">
+    <!-- Blockchain -->
+    <div class="card border-0 shadow-sm mb-4 border-start border-4 border-success">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">
+          <i class="bi bi-link-45deg text-success me-2"></i>Blockchain Record
+        </h5>
+        <div class="mb-2">
+          <small class="text-muted d-block">Record ID</small>
+          <code class="text-primary">#{{ record_id }}</code>
+        </div>
+        <div class="mb-2">
+          <small class="text-muted d-block">SHA-256 Hash</small>
+          <div class="hash-display p-2 rounded-2 bg-light mt-1">
+            <code class="small" style="word-break:break-all">{{ block_hash }}</code>
+          </div>
+        </div>
+        <div class="alert alert-success py-2 mb-0 mt-3">
+          <i class="bi bi-shield-check me-2"></i>
+          <strong>Record Secured</strong><br>
+          <small>This record is immutably hashed on our blockchain. Any alteration will be detected.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-lightning me-2"></i>Next Steps</h5>
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('patient_record_detail', record_id=record_id) }}"
+             class="btn btn-primary-custom">
+            <i class="bi bi-eye me-2"></i>View Full Record
+          </a>
+          <a href="{{ url_for('manage_consent') }}" class="btn btn-outline-success">
+            <i class="bi bi-shield-check me-2"></i>Share with Doctor
+          </a>
+          <a href="{{ url_for('predict') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-repeat me-2"></i>New Prediction
+          </a>
+          <a href="{{ url_for('patient_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-house me-2"></i>Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

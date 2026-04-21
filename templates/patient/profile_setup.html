@@ -1,0 +1,838 @@
+{% extends "base.html" %}
+{% block title %}Health Profile Setup{% endblock %}
+
+{% block content %}
+
+<!-- ── Animated Notification Banner ──────────────────────── -->
+{% if not profile %}
+<div class="profile-notification-banner mb-4" id="profileNotif">
+  <div class="notif-pulse"></div>
+  <div class="notif-content">
+    <div class="notif-icon">
+      <i class="bi bi-person-fill-exclamation"></i>
+    </div>
+    <div class="notif-text">
+      <strong>Complete Your Health Profile</strong>
+      <span>We need a few details to personalise your AI diagnosis experience. This takes less than 2 minutes!</span>
+    </div>
+    <button class="notif-close" onclick="document.getElementById('profileNotif').style.display='none'">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+  <div class="notif-progress-bar"></div>
+</div>
+{% endif %}
+
+<!-- ── Page Header ─────────────────────────────────────── -->
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+
+    <!-- Header Card -->
+    <div class="profile-header-card mb-4">
+      <div class="row align-items-center">
+        <div class="col-auto">
+          <div class="profile-avatar">
+            <i class="bi bi-person-heart"></i>
+          </div>
+        </div>
+        <div class="col">
+          <h3 class="fw-bold mb-1 text-white">
+            {% if profile %}Update{% else %}Set Up{% endif %} Your Health Profile
+          </h3>
+          <p class="mb-0 opacity-75 text-white">
+            Your information is encrypted and secured with blockchain technology
+          </p>
+        </div>
+        <div class="col-auto">
+          <div class="d-flex flex-column align-items-center">
+            <div class="profile-shield">
+              <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <small class="text-white opacity-75 mt-1">Secured</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BMI Live Calculator hint -->
+    <div class="bmi-live-card mb-4" id="bmiCard" style="display:none;">
+      <div class="row align-items-center text-center">
+        <div class="col-4 border-end">
+          <div class="bmi-stat-label">BMI</div>
+          <div class="bmi-stat-value" id="bmiVal">—</div>
+        </div>
+        <div class="col-4 border-end">
+          <div class="bmi-stat-label">Category</div>
+          <div class="bmi-stat-value" id="bmiCat">—</div>
+        </div>
+        <div class="col-4">
+          <div class="bmi-stat-label">Ideal Weight</div>
+          <div class="bmi-stat-value" id="idealWeight">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+      <!-- Steps indicator -->
+      <div class="steps-bar px-4 pt-4 pb-2">
+        <div class="step active" id="step1dot">
+          <div class="step-dot">1</div>
+          <div class="step-label">Basic Info</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step2dot">
+          <div class="step-dot">2</div>
+          <div class="step-label">Body Metrics</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="step3dot">
+          <div class="step-dot">3</div>
+          <div class="step-label">Medical Info</div>
+        </div>
+      </div>
+
+      <div class="card-body p-4">
+        <form method="POST" action="{{ url_for('patient_profile') }}" id="profileForm" novalidate>
+
+          <!-- ══ STEP 1: Basic Info ══ -->
+          <div class="form-step" id="formStep1">
+            <h5 class="step-title mb-4">
+              <i class="bi bi-person-circle text-primary me-2"></i>Basic Information
+            </h5>
+
+            <div class="row g-3">
+
+              <!-- Age -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  Age <span class="text-danger">*</span>
+                </label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-primary-light border-0">
+                    <i class="bi bi-calendar3 text-primary"></i>
+                  </span>
+                  <input type="number" name="age" id="ageInput"
+                         class="form-control border-start-0 ps-2"
+                         placeholder="e.g. 28"
+                         min="1" max="120" required
+                         value="{{ profile.age if profile else '' }}">
+                  <span class="input-group-text bg-light border-0 text-muted">years</span>
+                </div>
+                <div class="form-text text-muted">
+                  <i class="bi bi-info-circle me-1"></i>Enter your current age in years
+                </div>
+              </div>
+
+              <!-- Gender -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  Gender <span class="text-danger">*</span>
+                </label>
+                <div class="gender-select-group">
+                  {% set cur_gender = profile.gender if profile else '' %}
+                  <label class="gender-option {% if cur_gender == 'Male' %}selected{% endif %}">
+                    <input type="radio" name="gender" value="Male"
+                           {% if cur_gender == 'Male' %}checked{% endif %} required>
+                    <i class="bi bi-gender-male"></i> Male
+                  </label>
+                  <label class="gender-option {% if cur_gender == 'Female' %}selected{% endif %}">
+                    <input type="radio" name="gender" value="Female"
+                           {% if cur_gender == 'Female' %}checked{% endif %}>
+                    <i class="bi bi-gender-female"></i> Female
+                  </label>
+                  <label class="gender-option {% if cur_gender == 'Other' %}selected{% endif %}">
+                    <input type="radio" name="gender" value="Other"
+                           {% if cur_gender == 'Other' %}checked{% endif %}>
+                    <i class="bi bi-gender-ambiguous"></i> Other
+                  </label>
+                </div>
+              </div>
+
+              <!-- Blood Group -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  Blood Group <span class="text-danger">*</span>
+                </label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-danger-subtle border-0">
+                    <i class="bi bi-droplet-fill text-danger"></i>
+                  </span>
+                  <select name="blood_group" class="form-select border-start-0" required>
+                    <option value="" disabled {% if not profile %}selected{% endif %}>Select blood group…</option>
+                    {% for bg in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                    <option value="{{ bg }}"
+                      {% if profile and profile.blood_group == bg %}selected{% endif %}>
+                      {{ bg }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <!-- Emergency Contact -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Emergency Contact</label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-warning-subtle border-0">
+                    <i class="bi bi-telephone-fill text-warning"></i>
+                  </span>
+                  <input type="tel" name="emergency_contact"
+                         class="form-control border-start-0 ps-2"
+                         placeholder="e.g. +91 98765 43210"
+                         value="{{ profile.emergency_contact if profile else '' }}">
+                </div>
+              </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+              <button type="button" class="btn btn-primary-custom px-4 py-2"
+                      onclick="goToStep(2)">
+                Next: Body Metrics <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ══ STEP 2: Body Metrics ══ -->
+          <div class="form-step d-none" id="formStep2">
+            <h5 class="step-title mb-4">
+              <i class="bi bi-rulers text-primary me-2"></i>Body Metrics
+            </h5>
+
+            <div class="row g-3">
+
+              <!-- Weight -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  Weight <span class="text-danger">*</span>
+                </label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-primary-light border-0">
+                    <i class="bi bi-speedometer2 text-primary"></i>
+                  </span>
+                  <input type="number" name="weight_kg" id="weightInput"
+                         class="form-control border-start-0 ps-2"
+                         placeholder="e.g. 70"
+                         step="0.1" min="10" max="500" required
+                         value="{{ profile.weight_kg if profile else '' }}"
+                         oninput="calcBMI()">
+                  <span class="input-group-text bg-light border-0 text-muted">kg</span>
+                </div>
+                <div class="weight-slider-wrap mt-2">
+                  <input type="range" class="form-range"
+                         min="30" max="200" step="0.5" id="weightSlider"
+                         value="{{ profile.weight_kg if profile else 70 }}"
+                         oninput="document.getElementById('weightInput').value=this.value; calcBMI()">
+                  <div class="d-flex justify-content-between">
+                    <small class="text-muted">30 kg</small>
+                    <small class="text-muted">200 kg</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Height -->
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  Height <span class="text-danger">*</span>
+                </label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text bg-primary-light border-0">
+                    <i class="bi bi-person-standing text-primary"></i>
+                  </span>
+                  <input type="number" name="height_cm" id="heightInput"
+                         class="form-control border-start-0 ps-2"
+                         placeholder="e.g. 170"
+                         step="0.5" min="50" max="300" required
+                         value="{{ profile.height_cm if profile else '' }}"
+                         oninput="calcBMI()">
+                  <span class="input-group-text bg-light border-0 text-muted">cm</span>
+                </div>
+                <div class="weight-slider-wrap mt-2">
+                  <input type="range" class="form-range"
+                         min="100" max="230" step="0.5" id="heightSlider"
+                         value="{{ profile.height_cm if profile else 170 }}"
+                         oninput="document.getElementById('heightInput').value=this.value; calcBMI()">
+                  <div class="d-flex justify-content-between">
+                    <small class="text-muted">100 cm</small>
+                    <small class="text-muted">230 cm</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ft/in converter -->
+              <div class="col-12">
+                <div class="unit-converter-card p-3 rounded-3">
+                  <small class="fw-semibold text-muted">
+                    <i class="bi bi-arrow-left-right me-1"></i>Height Converter (ft/in → cm)
+                  </small>
+                  <div class="row g-2 mt-1 align-items-center">
+                    <div class="col-auto">
+                      <input type="number" id="ftInput" class="form-control form-control-sm"
+                             placeholder="ft" min="1" max="9" style="width:65px"
+                             oninput="convertToCm()">
+                    </div>
+                    <div class="col-auto"><small class="text-muted">ft</small></div>
+                    <div class="col-auto">
+                      <input type="number" id="inInput" class="form-control form-control-sm"
+                             placeholder="in" min="0" max="11" style="width:65px"
+                             oninput="convertToCm()">
+                    </div>
+                    <div class="col-auto"><small class="text-muted">in</small></div>
+                    <div class="col-auto">
+                      <span class="badge bg-primary-subtle text-primary px-3 py-2" id="cmResult">→ cm</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+              <button type="button" class="btn btn-outline-secondary px-4 py-2"
+                      onclick="goToStep(1)">
+                <i class="bi bi-arrow-left me-2"></i>Back
+              </button>
+              <button type="button" class="btn btn-primary-custom px-4 py-2"
+                      onclick="goToStep(3)">
+                Next: Medical Info <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ══ STEP 3: Medical Info ══ -->
+          <div class="form-step d-none" id="formStep3">
+            <h5 class="step-title mb-4">
+              <i class="bi bi-file-medical text-primary me-2"></i>Medical Information
+              <span class="badge bg-secondary ms-2 fs-6 fw-normal">Optional</span>
+            </h5>
+
+            <div class="row g-3">
+
+              <!-- Allergies -->
+              <div class="col-12">
+                <label class="form-label fw-semibold">Known Allergies</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-warning-subtle border-0">
+                    <i class="bi bi-exclamation-triangle-fill text-warning"></i>
+                  </span>
+                  <input type="text" name="allergies"
+                         class="form-control border-start-0"
+                         placeholder="e.g. Penicillin, Peanuts, Dust (comma separated)"
+                         value="{{ profile.allergies if profile else '' }}">
+                </div>
+              </div>
+
+              <!-- Chronic Conditions -->
+              <div class="col-12">
+                <label class="form-label fw-semibold">Existing Medical Conditions</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-info-subtle border-0">
+                    <i class="bi bi-heart-pulse-fill text-info"></i>
+                  </span>
+                  <input type="text" name="chronic_conditions"
+                         class="form-control border-start-0"
+                         placeholder="e.g. Diabetes, Hypertension, Asthma"
+                         value="{{ profile.chronic_conditions if profile else '' }}">
+                </div>
+                <div class="form-text text-muted">
+                  <i class="bi bi-lock-fill me-1"></i>
+                  This data is never shared without your explicit consent
+                </div>
+              </div>
+
+              <!-- Summary card before submit -->
+              <div class="col-12 mt-2">
+                <div class="summary-preview rounded-3 p-3" id="summaryPreview">
+                  <h6 class="fw-bold mb-2">
+                    <i class="bi bi-clipboard2-check text-success me-2"></i>Profile Summary
+                  </h6>
+                  <div class="row g-2 text-sm">
+                    <div class="col-6 col-md-3">
+                      <div class="summary-item">
+                        <div class="summary-label">Age</div>
+                        <div class="summary-val" id="sumAge">—</div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div class="summary-item">
+                        <div class="summary-label">Gender</div>
+                        <div class="summary-val" id="sumGender">—</div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div class="summary-item">
+                        <div class="summary-label">Weight</div>
+                        <div class="summary-val" id="sumWeight">—</div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div class="summary-item">
+                        <div class="summary-label">Height</div>
+                        <div class="summary-val" id="sumHeight">—</div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div class="summary-item">
+                        <div class="summary-label">Blood Group</div>
+                        <div class="summary-val" id="sumBlood">—</div>
+                      </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <div class="summary-item">
+                        <div class="summary-label">BMI</div>
+                        <div class="summary-val" id="sumBMI">—</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+              <button type="button" class="btn btn-outline-secondary px-4 py-2"
+                      onclick="goToStep(2)">
+                <i class="bi bi-arrow-left me-2"></i>Back
+              </button>
+              <button type="submit" class="btn btn-success px-5 py-2 fw-semibold submit-btn"
+                      onclick="updateSummary()">
+                <i class="bi bi-check2-circle me-2"></i>
+                {% if profile %}Update Profile{% else %}Save Profile{% endif %}
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- Info Footer -->
+    <div class="mt-3 text-center text-muted">
+      <small>
+        <i class="bi bi-shield-check text-success me-1"></i>
+        Your health data is stored securely and protected under our privacy policy.
+        <a href="{{ url_for('patient_dashboard') }}" class="ms-2">Skip for now →</a>
+      </small>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+/* ── Notification Banner ─────────────────────────────────── */
+.profile-notification-banner {
+  position: relative;
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(255, 107, 53, 0.3);
+  animation: slideInBanner 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes slideInBanner {
+  from { transform: translateY(-30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.notif-pulse {
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  animation: pulseBg 2s ease-in-out infinite;
+}
+
+@keyframes pulseBg {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%       { transform: scale(1.2); opacity: 0.2; }
+}
+
+.notif-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  color: white;
+}
+
+.notif-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+  animation: bellShake 2s ease-in-out infinite;
+}
+
+@keyframes bellShake {
+  0%, 80%, 100% { transform: rotate(0deg); }
+  10%, 30%      { transform: rotate(-12deg); }
+  20%, 40%      { transform: rotate(12deg); }
+}
+
+.notif-text {
+  flex: 1;
+}
+
+.notif-text strong {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.notif-text span {
+  font-size: 0.88rem;
+  opacity: 0.92;
+}
+
+.notif-close {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.notif-close:hover { background: rgba(255,255,255,0.35); }
+
+.notif-progress-bar {
+  height: 4px;
+  background: rgba(255,255,255,0.4);
+  position: relative;
+  overflow: hidden;
+}
+.notif-progress-bar::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  height: 100%;
+  width: 60%;
+  background: rgba(255,255,255,0.9);
+  border-radius: 0 4px 4px 0;
+  animation: notifProgress 3s ease-in-out infinite alternate;
+}
+@keyframes notifProgress {
+  from { width: 20%; }
+  to   { width: 90%; }
+}
+
+/* ── Profile Header Card ─────────────────────────────────── */
+.profile-header-card {
+  background: linear-gradient(135deg, #1a6fba, #0d4e8a);
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 8px 32px rgba(26, 111, 186, 0.25);
+}
+
+.profile-avatar {
+  width: 64px; height: 64px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+.profile-shield {
+  width: 52px; height: 52px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; color: white;
+}
+
+/* ── BMI Live Card ─────────────────────────────────────── */
+.bmi-live-card {
+  background: white;
+  border: 2px solid #e8f3ff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 4px 16px rgba(26,111,186,0.08);
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+.bmi-stat-label { font-size: 0.75rem; color: #6c757d; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.bmi-stat-value { font-size: 1.4rem; font-weight: 700; color: #1a6fba; margin-top: 2px; }
+
+/* ── Steps Bar ─────────────────────────────────────────── */
+.steps-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.step-dot {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: #e9ecef;
+  color: #adb5bd;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.9rem;
+  transition: all 0.3s;
+}
+.step.active .step-dot {
+  background: linear-gradient(135deg, #1a6fba, #0d4e8a);
+  color: white;
+  box-shadow: 0 4px 12px rgba(26,111,186,0.35);
+}
+.step.done .step-dot {
+  background: #198754;
+  color: white;
+}
+.step-label {
+  font-size: 0.72rem;
+  color: #adb5bd;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.step.active .step-label { color: #1a6fba; }
+.step.done .step-label { color: #198754; }
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #e9ecef;
+  margin: 0 8px;
+  margin-bottom: 20px;
+  min-width: 40px;
+  transition: background 0.3s;
+}
+
+/* ── Form Steps ────────────────────────────────────────── */
+.step-title {
+  color: #1a6fba;
+  border-bottom: 2px solid #e8f3ff;
+  padding-bottom: 10px;
+}
+.form-step { animation: fadeIn 0.3s ease; }
+
+/* ── Custom Inputs ─────────────────────────────────────── */
+.bg-primary-light { background: #e8f3ff !important; }
+
+.gender-select-group {
+  display: flex;
+  gap: 8px;
+}
+.gender-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  color: #6c757d;
+}
+.gender-option input[type=radio] { display: none; }
+.gender-option:hover { border-color: #1a6fba; color: #1a6fba; background: #e8f3ff; }
+.gender-option.selected { border-color: #1a6fba; color: #1a6fba; background: #e8f3ff; }
+
+/* ── Slider ────────────────────────────────────────────── */
+.weight-slider-wrap { padding: 4px 2px; }
+.form-range::-webkit-slider-thumb { background: #1a6fba; }
+
+/* ── Unit Converter ────────────────────────────────────── */
+.unit-converter-card {
+  background: #f8f9fa;
+  border: 1px dashed #dee2e6;
+}
+
+/* ── Summary Preview ────────────────────────────────────── */
+.summary-preview {
+  background: linear-gradient(135deg, #f0f7ff, #e8f3ff);
+  border: 1px solid #cfe2ff;
+}
+.summary-item {
+  background: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.summary-label { font-size: 0.7rem; color: #6c757d; font-weight: 600; text-transform: uppercase; }
+.summary-val   { font-size: 1rem; font-weight: 700; color: #1a6fba; }
+
+/* ── Submit Button ─────────────────────────────────────── */
+.submit-btn {
+  background: linear-gradient(135deg, #198754, #14603d) !important;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(25, 135, 84, 0.3);
+  transition: all 0.2s;
+}
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(25,135,84,0.4); }
+.btn-primary-custom { background: linear-gradient(135deg, #1a6fba, #0d4e8a); border: none; color: white; border-radius: 10px; }
+.btn-primary-custom:hover { background: linear-gradient(135deg, #155090, #0a3568); color: white; }
+</style>
+
+<script>
+let currentStep = 1;
+
+// ── Step Navigation ──────────────────────────────────────
+function goToStep(n) {
+  // Basic validation before advancing
+  if (n > currentStep) {
+    if (currentStep === 1 && !validateStep1()) return;
+    if (currentStep === 2 && !validateStep2()) return;
+  }
+
+  document.getElementById('formStep' + currentStep).classList.add('d-none');
+  document.getElementById('formStep' + n).classList.remove('d-none');
+
+  // Update step dots
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('step' + i + 'dot');
+    dot.classList.remove('active', 'done');
+    if (i < n)  dot.classList.add('done');
+    if (i === n) dot.classList.add('active');
+  }
+
+  if (n === 3) updateSummary();
+  currentStep = n;
+}
+
+function validateStep1() {
+  const age = document.getElementById('ageInput').value;
+  const gender = document.querySelector('input[name="gender"]:checked');
+  const blood = document.querySelector('select[name="blood_group"]').value;
+  if (!age || age < 1 || age > 120) {
+    alert('Please enter a valid age (1–120 years).');
+    return false;
+  }
+  if (!gender) {
+    alert('Please select your gender.');
+    return false;
+  }
+  if (!blood) {
+    alert('Please select your blood group.');
+    return false;
+  }
+  return true;
+}
+
+function validateStep2() {
+  const w = document.getElementById('weightInput').value;
+  const h = document.getElementById('heightInput').value;
+  if (!w || w < 10 || w > 500) {
+    alert('Please enter a valid weight (10–500 kg).');
+    return false;
+  }
+  if (!h || h < 50 || h > 300) {
+    alert('Please enter a valid height (50–300 cm).');
+    return false;
+  }
+  return true;
+}
+
+// ── BMI Calculator ─────────────────────────────────────
+function calcBMI() {
+  const w = parseFloat(document.getElementById('weightInput').value);
+  const h = parseFloat(document.getElementById('heightInput').value);
+
+  // Sync sliders
+  if (!isNaN(w)) document.getElementById('weightSlider').value = w;
+  if (!isNaN(h)) document.getElementById('heightSlider').value = h;
+
+  if (!w || !h) return;
+
+  const hm = h / 100;
+  const bmi = (w / (hm * hm)).toFixed(1);
+
+  let cat = '—', catColor = '';
+  if (bmi < 18.5)      { cat = 'Underweight'; catColor = '#0dcaf0'; }
+  else if (bmi < 25)   { cat = 'Normal ✓';    catColor = '#198754'; }
+  else if (bmi < 30)   { cat = 'Overweight';  catColor = '#ffc107'; }
+  else                 { cat = 'Obese';        catColor = '#dc3545'; }
+
+  const idealLow  = (18.5 * hm * hm).toFixed(0);
+  const idealHigh = (24.9 * hm * hm).toFixed(0);
+
+  document.getElementById('bmiVal').textContent = bmi;
+  document.getElementById('bmiVal').style.color = catColor;
+  document.getElementById('bmiCat').textContent = cat;
+  document.getElementById('bmiCat').style.color = catColor;
+  document.getElementById('idealWeight').textContent = idealLow + '–' + idealHigh + ' kg';
+
+  document.getElementById('bmiCard').style.display = 'block';
+}
+
+// ── ft/in → cm Converter ──────────────────────────────
+function convertToCm() {
+  const ft = parseFloat(document.getElementById('ftInput').value) || 0;
+  const inn = parseFloat(document.getElementById('inInput').value) || 0;
+  const cm = ((ft * 12 + inn) * 2.54).toFixed(1);
+  if (ft > 0 || inn > 0) {
+    document.getElementById('cmResult').textContent = cm + ' cm';
+    document.getElementById('heightInput').value = cm;
+    document.getElementById('heightSlider').value = cm;
+    calcBMI();
+  }
+}
+
+// ── Gender option highlighting ────────────────────────
+document.querySelectorAll('.gender-option').forEach(opt => {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('.gender-option').forEach(o => o.classList.remove('selected'));
+    this.classList.add('selected');
+  });
+});
+
+// ── Summary ────────────────────────────────────────────
+function updateSummary() {
+  const age    = document.getElementById('ageInput').value;
+  const gender = document.querySelector('input[name="gender"]:checked');
+  const weight = document.getElementById('weightInput').value;
+  const height = document.getElementById('heightInput').value;
+  const blood  = document.querySelector('select[name="blood_group"]').value;
+
+  document.getElementById('sumAge').textContent    = age    ? age + ' yrs' : '—';
+  document.getElementById('sumGender').textContent = gender ? gender.value : '—';
+  document.getElementById('sumWeight').textContent = weight ? weight + ' kg' : '—';
+  document.getElementById('sumHeight').textContent = height ? height + ' cm' : '—';
+  document.getElementById('sumBlood').textContent  = blood  || '—';
+
+  if (weight && height) {
+    const hm = height / 100;
+    const bmi = (weight / (hm * hm)).toFixed(1);
+    document.getElementById('sumBMI').textContent = bmi;
+  }
+}
+
+// ── Init: pre-populate sliders & BMI on edit ─────────
+window.addEventListener('DOMContentLoaded', () => {
+  const w = document.getElementById('weightInput').value;
+  const h = document.getElementById('heightInput').value;
+  if (w) document.getElementById('weightSlider').value = w;
+  if (h) document.getElementById('heightSlider').value = h;
+  if (w && h) calcBMI();
+
+  // Auto-dismiss notification after 8s
+  const notif = document.getElementById('profileNotif');
+  if (notif) {
+    setTimeout(() => {
+      notif.style.transition = 'opacity 0.5s, transform 0.5s';
+      notif.style.opacity = '0';
+      notif.style.transform = 'translateY(-10px)';
+      setTimeout(() => notif.style.display = 'none', 500);
+    }, 8000);
+  }
+});
+</script>
+{% endblock %}

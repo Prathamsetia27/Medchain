@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between mb-4">
+  <h3 class="fw-bold"><i class="bi bi-people me-2"></i>All Users</h3>
+  <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">← Dashboard</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Phone</th>
+            <th>Specialization</th>
+            <th>Registered</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td><small class="text-muted">#{{ u.id }}</small></td>
+            <td><strong>{{ u.full_name }}</strong></td>
+            <td><small>{{ u.email }}</small></td>
+            <td>
+              <span class="badge bg-{{ 'primary' if u.role == 'patient' else 'success' if u.role == 'doctor' else 'warning text-dark' }}">
+                {{ u.role | capitalize }}
+              </span>
+            </td>
+            <td><small>{{ u.phone or '—' }}</small></td>
+            <td><small>{{ u.specialization or '—' }}</small></td>
+            <td><small>{{ u.created_at[:10] }}</small></td>
+            <td>
+              <span class="badge bg-{{ 'success' if u.is_active else 'danger' }}-subtle text-{{ 'success' if u.is_active else 'danger' }}">
+                {{ 'Active' if u.is_active else 'Inactive' }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

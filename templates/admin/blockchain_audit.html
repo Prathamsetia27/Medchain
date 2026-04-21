@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Blockchain Audit{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between mb-4">
+  <div>
+    <h3 class="fw-bold"><i class="bi bi-link-45deg me-2"></i>Blockchain Integrity Audit</h3>
+    <small class="text-muted">All medical records are verified against their SHA-256 hash.</small>
+  </div>
+  <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">← Dashboard</a>
+</div>
+
+<!-- Audit summary -->
+{% set intact_count = audit_results | selectattr('intact') | list | length %}
+{% set tampered_count = audit_results | length - intact_count %}
+
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm border-start border-4 border-success">
+      <div class="card-body py-4 text-center">
+        <i class="bi bi-shield-check-fill display-4 text-success mb-2"></i>
+        <h2 class="fw-bold text-success">{{ intact_count }}</h2>
+        <p class="mb-0 text-muted">Records Verified Intact</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm border-start border-4 border-danger">
+      <div class="card-body py-4 text-center">
+        <i class="bi bi-shield-x-fill display-4 text-danger mb-2"></i>
+        <h2 class="fw-bold text-danger">{{ tampered_count }}</h2>
+        <p class="mb-0 text-muted">Tampered / Integrity Failed</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm border-start border-4 border-primary">
+      <div class="card-body py-4 text-center">
+        <i class="bi bi-file-medical-fill display-4 text-primary mb-2"></i>
+        <h2 class="fw-bold text-primary">{{ audit_results | length }}</h2>
+        <p class="mb-0 text-muted">Total Records Audited</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- How it works -->
+<div class="alert alert-info mb-4">
+  <h6 class="fw-bold"><i class="bi bi-info-circle me-2"></i>How Blockchain Verification Works</h6>
+  <p class="mb-0 small">
+    When a patient's diagnosis is saved, we compute a SHA-256 hash of the record data 
+    (symptoms, disease, confidence, timestamp) combined with the previous record's hash — 
+    creating a <strong>chain</strong>. On audit, we recompute each hash and compare it to 
+    the stored hash. If they match → record is intact. If they differ → tampering detected.
+  </p>
+</div>
+
+<!-- Records table -->
+{% if audit_results %}
+<div class="card border-0 shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Record ID</th>
+            <th>Patient</th>
+            <th>Disease</th>
+            <th>Timestamp</th>
+            <th>SHA-256 Hash (first 24 chars)</th>
+            <th>Integrity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ar in audit_results %}
+          <tr class="{{ '' if ar.intact else 'table-danger' }}">
+            <td><small class="text-muted">#{{ ar.record.id }}</small></td>
+            <td><small>{{ ar.record.patient_name }}</small></td>
+            <td><strong>{{ ar.record.predicted_disease }}</strong></td>
+            <td><small>{{ ar.record.timestamp[:16].replace('T',' ') }}</small></td>
+            <td>
+              <code class="small text-secondary">{{ ar.record.blockchain_hash[:24] }}…</code>
+            </td>
+            <td>
+              {% if ar.intact %}
+              <span class="badge bg-success px-3 py-2">
+                <i class="bi bi-shield-check me-1"></i>VERIFIED
+              </span>
+              {% else %}
+              <span class="badge bg-danger px-3 py-2">
+                <i class="bi bi-shield-x me-1"></i>TAMPERED
+              </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="bi bi-file-medical display-1 opacity-25"></i>
+  <h5 class="mt-4">No records to audit</h5>
+  <p>Medical records will appear here once patients start using the AI diagnosis system.</p>
+</div>
+{% endif %}
+
+{% endblock %}
